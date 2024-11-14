@@ -29,7 +29,7 @@ func SetUpAuth(app *fiber.App) {
         },
         Realm: "Forbidden",
         Unauthorized: func(c *fiber.Ctx) error {
-            return c.JSON(fiber.Map{
+            return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
                 "ok": false,
                 "reason": "Unauthorized",
             })
