@@ -1,6 +1,0 @@
-**/*.go
-**/*.mod
-**/*.sum
-Dockerfile
-.dockerignore
-node_modules/
