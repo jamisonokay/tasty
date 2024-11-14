@@ -12,7 +12,7 @@ import (
 func GetUrls() ([]string, error) {
     path, _ := launcher.LookPath()
     u := launcher.New().Bin(path).MustLaunch()
-    browser := rod.New().ControlURL(u).MustConnect()
+    browser := rod.New().ControlURL(u)
     defer browser.MustClose()
     page := browser.MustPage("https://shop.tastycoffee.ru/login")
 
