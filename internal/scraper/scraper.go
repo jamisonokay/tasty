@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"errors"
+	"log"
 	"os"
 
 	"github.com/go-rod/rod"
@@ -10,9 +11,13 @@ import (
 )
 
 func GetUrls() ([]string, error) {
-    path, _ := launcher.LookPath()
-    u := launcher.New().Bin(path).MustLaunch()
-    browser := rod.New().ControlURL(u).MustConnect()
+    rodRemote, exist:= os.LookupEnv("ROD_REMOTE")
+    if !exist {
+        log.Fatal("Cant't connect to browser havent remote")
+        return nil, errors.New("ROD_REMOTE env is not set")
+    }
+    launch := launcher.MustNewManaged(rodRemote)
+    browser := rod.New().Client(launch.MustClient()).MustConnect()
     page := browser.MustPage("https://shop.tastycoffee.ru/login")
 
     email, e := os.LookupEnv("EMAIL")
