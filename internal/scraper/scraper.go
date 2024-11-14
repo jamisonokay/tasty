@@ -12,8 +12,7 @@ import (
 func GetUrls() ([]string, error) {
     path, _ := launcher.LookPath()
     u := launcher.New().Bin(path).MustLaunch()
-    browser := rod.New().ControlURL(u)
-    defer browser.MustClose()
+    browser := rod.New().ControlURL(u).MustConnect()
     page := browser.MustPage("https://shop.tastycoffee.ru/login")
 
     email, e := os.LookupEnv("EMAIL")
@@ -37,6 +36,6 @@ func GetUrls() ([]string, error) {
         link := linkElement.MustProperty("href").String()
         links = append(links, link)
     }
-
+    defer browser.MustClose()
     return links, nil
 }
