@@ -1,14 +1,18 @@
 package scraper
 
 import (
-    "errors"
-    "os"
-    "github.com/go-rod/rod"
-    "github.com/go-rod/rod/lib/input"
+	"errors"
+	"os"
+
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/input"
+	"github.com/go-rod/rod/lib/launcher"
 )
 
 func GetUrls() ([]string, error) {
-    browser := rod.New().MustConnect()
+    path, _ := launcher.LookPath()
+    u := launcher.New().Bin(path).MustLaunch()
+    browser := rod.New().ControlURL(u).MustConnect()
     defer browser.MustClose()
     page := browser.MustPage("https://shop.tastycoffee.ru/login")
 
