@@ -20,8 +20,6 @@ node_modules/
 .env
 
 # Docker файлы и кэш
-Dockerfile
-.dockerignore
 /.cache
 /tmp
 
