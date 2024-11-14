@@ -5,17 +5,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      environment:
-        - ROD_REMOTE=http://browser:7317
-        - AUTH_USERNAME=${AUTH_USERNAME}
-        - AUTH_PASSWORD=${AUTH_PASSWORD}
-      depends_on:
-        - browser
-      ports:
-        - "3005:3005"
+    environment:
+      - ROD_REMOTE=http://browser:7317
+      - AUTH_USERNAME=${AUTH_USERNAME}
+      - AUTH_PASSWORD=${AUTH_PASSWORD}
+    depends_on:
+      - browser
+    ports:
+      - "3005:3005"
 
-      browser:
-        image: ghcr.io/go-rod/rod
-        command: ["rod-manager", "--address", ":7317", "--quiet"]
-        ports:
-          - "7317:7317"
+  browser:
+    image: ghcr.io/go-rod/rod
+    command: ["rod-manager", "--address", ":7317", "--quiet"]
+    ports:
+      - "7317:7317"
