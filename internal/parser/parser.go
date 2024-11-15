@@ -1,12 +1,90 @@
 package parser
+
 import (
-    "github.com/gocolly/colly"
-    "regexp"
-    "strconv"
-    "strings"
-    "sync"
-    "github.com/jamisonokay/tasty/internal/models"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
+	"sync"
+
+	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/extensions"
+	"github.com/jamisonokay/tasty/internal/models"
 )
+
+type ResponseBody struct {
+    URL string `json:"url"`
+}
+
+func GetUrls(url string) ([]string, string) {
+
+
+    var csrfToken string
+    var urls []string
+    var response ResponseBody
+    c := colly.NewCollector()
+
+    extensions.RandomUserAgent(c)
+    extensions.Referer(c)
+
+    c.OnHTML("meta[name='csrf-token']", func(h *colly.HTMLElement) {
+        csrfToken = h.Attr("content")
+        fmt.Println("Получен CSRF токен:", csrfToken)
+
+        body := bytes.NewBuffer([]byte(`{}`))
+
+        req, err := http.NewRequest("POST", "https://shop.tastycoffee.ru/basket/create_share_link", body)
+        if err != nil {
+            fmt.Println("Ошибка при создании запроса:", err)
+            return
+        }
+
+        req.Header.Set("Content-Type", "application/json") 
+        req.Header.Set("X-CSRF-TOKEN", csrfToken)         
+        req.Header.Set("Referer", url)                   
+        req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)") 
+
+        // Передаём куки из colly в запрос
+        cookies := c.Cookies("https://shop.tastycoffee.ru")
+        for _, cookie := range cookies {
+            req.AddCookie(cookie)
+        }
+
+        // Отправляем запрос
+        client := &http.Client{}
+        resp, err := client.Do(req)
+        if err != nil {
+            fmt.Println("Ошибка при выполнении запроса:", err)
+            return
+        }
+        defer resp.Body.Close()
+
+        respBody, err := io.ReadAll(resp.Body)
+        if err != nil {
+            fmt.Println("Ошибка при чтении ответа:", err)
+            return
+        }
+
+        // Разбираем JSON ответ с новым URL
+        if err := json.Unmarshal(respBody, &response); err != nil {
+            fmt.Println("Ошибка при разборе JSON:", err)
+            return
+        }
+    })
+
+    c.OnHTML("p.goods__name a", func(h *colly.HTMLElement) {
+        url := h.Attr("href")
+        urls = append(urls, url)
+    })
+
+    c.Visit(url)
+
+    return urls, response.URL
+}
 
 func Parse(urls []string) ([]models.Product, error) {
     var wg sync.WaitGroup
