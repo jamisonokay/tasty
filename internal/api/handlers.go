@@ -9,7 +9,7 @@ import (
 
 func GetItems(c *fiber.Ctx) error {
     payload := struct {
-        Url  string `json:"url"`
+        Urls  []string `json:"urls"`
     }{}
     if err := c.BodyParser(&payload); err != nil {
         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -17,13 +17,11 @@ func GetItems(c *fiber.Ctx) error {
             "reason": "Can't parse body to string[]",
         })
     }
-    urls, nextUrl := parser.GetUrls(payload.Url)
-    products, err := parser.Parse(urls)
+    products, err := parser.Parse(payload.Urls)
     if err != nil {
         log.Fatal(err)
     }
     return c.JSON(fiber.Map{
         "products": products,
-        "nextUrl": nextUrl,
     })
 }

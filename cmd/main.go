@@ -19,7 +19,5 @@ func main() {
     app := fiber.New()
     auth.SetUpAuth(app)
     app.Post("/api/items", api.GetItems)
-
-
     app.Listen("0.0.0.0:3005")
 }
